@@ -66,12 +66,13 @@ function token_balance(address from) public view returns(uint) {
     return balanceOf(from);
 }
 ```
-###Contract Deployment on Avalanche Fuji Testnet
-####To deploy this contract on the Avalanche Fuji testnet, follow these steps:
+### Contract Deployment on Avalanche Fuji Testnet
+#### To deploy this contract on the Avalanche Fuji testnet, follow these steps:
 
 Make sure you have access to an Avalanche wallet compatible with the Fuji testnet.
 Compile the contract code using a Solidity compiler compatible with Avalanche, and obtain the compiled bytecode.
 Deploy the contract to the Avalanche Fuji testnet using your Avalanche wallet's deployment functionality.
 After deployment, interact with the contract using Avalanche-compatible tools and wallets.
+
 ## License
 This project is licensed under the terms of the MIT license.
