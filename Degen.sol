@@ -1,37 +1,53 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract Degen is ERC20{
-    event Redeem(address indexed from ,uint indexed amount);
-    mapping(string=>uint) public i_price;
-    constructor() ERC20("Degen", "DGN") {}
+contract DegenToken is ERC20, Ownable {
+    mapping(uint256 => uint256) public itemPrices; // Mapping of item IDs to their prices
 
-        function mint(address _owner, uint amount) public {
-            require(msg.sender == _owner ,"Only owner can mint the tokens!");
-            _mint(_owner, amount);
+    constructor() ERC20("DegenToken", "DGN") {
+        // Mint an initial supply of tokens to the contract deployer (owner)
+        _mint(msg.sender, 1000000 * 10 ** uint(decimals())); // Adjust the initial supply as needed
     }
-    function transfer(address reciver , uint amount)override public virtual returns(bool){
-            _transfer(_msgSender(),reciver,amount);
-            return true;
+
+    // Mint new tokens, only callable by the owner
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
-    function redeem(string memory i_name, address from) public returns (uint) {
-        uint price = i_price[i_name];
-        require(balanceOf(from) >= price, "Insufficient Balance");
-        _burn(from, price);
-        emit Redeem(from,price);
-        return price;
+
+    // Transfer tokens to another address
+    function transferTokens(address to, uint256 amount) public {
+        require(to != address(0), "Invalid address");
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+        _transfer(msg.sender, to, amount);
     }
-    function setItemPrice(string memory i_name, uint price,address _owner) public {
-        require(_owner==msg.sender,"Only Owner can set price of items");
-        i_price[i_name] = price;
+
+    // Redeem tokens for items in the in-game store
+    function redeemTokens(uint256 itemId) public {
+        require(itemPrices[itemId] > 0, "Invalid item ID"); // Check if the item exists
+        uint256 price = itemPrices[itemId];
+        require(balanceOf(msg.sender) >= price, "Insufficient balance");
+
+        // Implement logic to deliver the item to the player here.
+        // For this example, we'll simply deduct the tokens from the player's balance.
+        _burn(msg.sender, price);
     }
-    function token_balance(address from)public view returns(uint){
-        return balanceOf(from);
+
+    // Add an item with a specific price to the in-game store
+    function addItemToStore(uint256 itemId, uint256 price) public onlyOwner {
+        itemPrices[itemId] = price;
     }
-    function burn(address from,uint amount)public{
-        require (balanceOf(msg.sender)>amount,"Insufficient Balance");
-        _burn(from, amount);
+
+    // Check token balance of an address
+    function getTokenBalance(address account) public view returns (uint256) {
+        return balanceOf(account);
+    }
+
+    // Burn tokens that are no longer needed
+    function burnTokens(uint256 amount) public {
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+        _burn(msg.sender, amount);
     }
 }
